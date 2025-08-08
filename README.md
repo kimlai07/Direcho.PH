@@ -4,8 +4,7 @@ This project is a React application that mimics the functionality and design of 
 
 ## Project Structure
 
-```
-cars24-clone
+```2
 ├── public
 │   ├── index.html         # Main HTML file
 │   └── favicon.ico        # Favicon for the website
