@@ -1,0 +1,614 @@
+/* Mobile First Design */
+.calculate {
+    min-height: 100vh;
+    background-color: #F9FAF5;
+    padding: 20px 0;
+}
+
+.calculate-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.calculate-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.calculate-title {
+    font-size: 28px;
+    color: #2D2D2D;
+    font-weight: bold;
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.calculate-subtitle {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.calculator-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    background-color: white;
+    padding: 5px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(15, 76, 129, 0.1);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background: linear-gradient(135deg, #0F4C81, #0A3A66);
+    color: white;
+    box-shadow: 0 2px 10px rgba(15, 76, 129, 0.2);
+}
+
+.calculator-content {
+    background-color: white;
+    padding: 30px 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(15, 76, 129, 0.1);
+}
+
+.loan-calculator h2,
+.depreciation-calculator h2 {
+    font-size: 24px;
+    color: #0F4C81;
+    margin-bottom: 25px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.calculator-form {
+    margin-bottom: 30px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2D2D2D;
+    font-size: 14px;
+}
+
+.percentage-value {
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 45px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(247, 140, 31, 0.2);
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    color: #2D2D2D;
+    background-color: white;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #F78C1F;
+    box-shadow: 0 0 0 3px rgba(247, 140, 31, 0.1);
+}
+
+.form-group input.error,
+.form-group select.error {
+    border-color: #dc3545;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.calculate-button {
+    background: linear-gradient(135deg, #0F4C81, #0A3A66);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+}
+
+.calculate-button:hover {
+    background: linear-gradient(135deg, #0A3A66, #08335A);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(15, 76, 129, 0.3);
+}
+
+/* Enhanced Slider Styles */
+.slider-container {
+    position: relative;
+    margin: 15px 0;
+    padding: 5px 0;
+}
+
+.slider-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 8px;
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    border-radius: 4px;
+    transform: translateY(-50%);
+    width: calc((var(--slider-value, 70) - 30) * 100% / 70);
+    transition: width 0.3s ease;
+    z-index: 1;
+}
+
+.slider-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(247, 140, 31, 0.1);
+    border-radius: 1px;
+    transform: translateY(-50%);
+    z-index: 0;
+}
+
+.loan-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(
+        to right,
+        #F78C1F 0%,
+        #F78C1F calc((var(--slider-value, 70) - 30) * 100% / 70),
+        #e1e5e9 calc((var(--slider-value, 70) - 30) * 100% / 70),
+        #e1e5e9 100%
+    );
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+}
+
+.loan-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(247, 140, 31, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.loan-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(247, 140, 31, 0.4);
+}
+
+.loan-slider::-webkit-slider-track {
+    height: 8px;
+    border-radius: 4px;
+    background: #e1e5e9;
+}
+
+.loan-slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px rgba(247, 140, 31, 0.3);
+}
+
+.loan-slider::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+    background: #e1e5e9;
+    border: none;
+}
+
+.loan-slider::-moz-range-progress {
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    border: none;
+}
+
+.loan-slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+    box-shadow: 0 6px 15px rgba(247, 140, 31, 0.5);
+}
+
+.loan-slider:focus {
+    outline: none;
+}
+
+.loan-slider:focus::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(247, 140, 31, 0.2), 0 2px 6px rgba(247, 140, 31, 0.3);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Enhanced results section design without breakdown */
+.results-section {
+    background: linear-gradient(135deg, #F9FAF5, #f0f4f7);
+    padding: 40px 30px;
+    border-radius: 15px;
+    border: 1px solid #e1e5e9;
+    margin-top: 30px;
+}
+
+.results-section h2 {
+    font-size: 28px;
+    color: #0F4C81;
+    margin-bottom: 35px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Improved result summary layout */
+.result-summary {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.summary-card {
+    background: white;
+    padding: 35px 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(15, 76, 129, 0.15);
+    border: 1px solid #e1e5e9;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(15, 76, 129, 0.2);
+}
+
+.summary-card.primary {
+    background: linear-gradient(135deg, #0F4C81, #0A3A66);
+    color: white;
+    border: none;
+}
+
+.summary-card.secondary {
+    background: linear-gradient(135deg, #F78C1F, #e67c16);
+    color: white;
+    border: none;
+}
+
+.summary-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-card .amount.large {
+    font-size: 42px;
+    font-weight: bold;
+    margin: 0;
+    line-height: 1.1;
+}
+
+/* Add some visual interest with icons */
+.summary-card.primary::before {
+    content: "💰";
+    font-size: 32px;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.summary-card.secondary::before {
+    content: "📅";
+    font-size: 32px;
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Hide breakdown results */
+.breakdown {
+    display: none;
+}
+
+/* Depreciation results styles */
+.depreciation-results {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+.result-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(15, 76, 129, 0.1);
+    border: 1px solid #e1e5e9;
+    transition: transform 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-2px);
+}
+
+.result-card.primary {
+    background: linear-gradient(135deg, #0F4C81, #0A3A66);
+    color: white;
+    border: none;
+}
+
+.result-card.primary .amount {
+    color: white;
+}
+
+.result-card h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.result-card .amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #0F4C81;
+    margin: 0;
+}
+
+/* Select styling */
+.form-group select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+    appearance: none;
+}
+
+/* Animation for results */
+.result-summary {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Placeholder styling */
+.form-group input::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+/* Tablet Styles */
+@media (min-width: 768px) {
+    .calculate {
+        padding: 30px 0;
+    }
+
+    .calculate-container {
+        padding: 0 30px;
+    }
+
+    .calculate-title {
+        font-size: 36px;
+        margin-bottom: 15px;
+    }
+
+    .calculate-subtitle {
+        font-size: 18px;
+    }
+
+    .tab-button {
+        font-size: 16px;
+        padding: 18px 25px;
+    }
+
+    .calculator-content {
+        padding: 40px 35px;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 25px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        font-size: 15px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+
+    .calculate-button {
+        max-width: 300px;
+        margin: 0 auto;
+        font-size: 18px;
+    }
+
+    .results-section {
+        padding: 50px 40px;
+    }
+    
+    .result-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+
+    .summary-card {
+        padding: 40px 30px;
+    }
+
+    .summary-card h3 {
+        font-size: 20px;
+        margin-bottom: 25px;
+    }
+
+    .summary-card .amount.large {
+        font-size: 48px;
+    }
+
+    .depreciation-results {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .result-card .amount {
+        font-size: 28px;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 1024px) {
+    .calculate {
+        padding: 40px 0;
+    }
+
+    .calculate-title {
+        font-size: 42px;
+    }
+
+    .calculator-content {
+        padding: 50px 40px;
+    }
+
+    .results-section {
+        padding: 60px 50px;
+    }
+
+    .summary-card {
+        padding: 45px 35px;
+    }
+
+    .summary-card h3 {
+        font-size: 22px;
+    }
+
+    .summary-card .amount.large {
+        font-size: 52px;
+    }
+
+    .depreciation-results {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+    }
+
+    .result-card {
+        padding: 25px 20px;
+    }
+
+    .result-card .amount {
+        font-size: 24px;
+    }
+}
+
+/* Responsive font scaling for mobile */
+@media (max-width: 480px) {
+    .summary-card {
+        padding: 25px 20px;
+    }
+    
+    .summary-card h3 {
+        font-size: 16px;
+        margin-bottom: 15px;
+    }
+    
+    .summary-card .amount.large {
+        font-size: 36px;
+    }
+    
+    .summary-card.primary::before,
+    .summary-card.secondary::before {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+}
