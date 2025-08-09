@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Vehicle, ApiResponse } from '../types/vehicle';
 
 // Keep original endpoints for future use
 const privateUrlVehicle = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle';
@@ -95,7 +96,7 @@ const mockVehicles = [
 ];
 
 // Flag to switch between mock and real API calls
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 export const fetchVehicles = async () => {
     if (USE_MOCK_DATA) {
@@ -105,7 +106,7 @@ export const fetchVehicles = async () => {
     }
     
     try {
-        const response = await axios.get(prodUrlVehicle);
+        const response = await axios.get(newProdVehicleUrl);
         return response.data;
     } catch (error) {
         console.error('Error fetching vehicles:', error);
@@ -121,7 +122,7 @@ export const fetchAllCars = async () => {
     }
     
     try {
-        const response = await axios.get(prodUrlVehicleAllCars);
+        const response = await axios.get(newProdVehicleUrl);
         return response.data;
     } catch (error) {
         console.error('Error fetching all cars:', error);
@@ -146,20 +147,16 @@ export const fetchNewVehicles = async () => {
 };
 
 export const getVehicleById = async (id) => {
-    if (USE_MOCK_DATA) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const vehicle = mockVehicles.find(car => car.id.toString() === id.toString());
+    try {
+        // Fetch all cars and filter by ID
+        const allCars = await fetchAllCars();
+        const vehicle = allCars.find(car => car.id.toString() === id.toString());
+        
         if (vehicle) {
             return { data: vehicle };
         } else {
             throw new Error('Vehicle not found');
         }
-    }
-    
-    try {
-        const response = await axios.get(`${prodUrlVehicleAllCars}&id=${id}`);
-        return response;
     } catch (error) {
         console.error('Error fetching vehicle by id:', error);
         throw error;

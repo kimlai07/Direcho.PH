@@ -1,11 +1,8 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './styles/global.css';
+import ReactDOM from 'react-dom/client';
+import App from './App'; // This will now import App.tsx
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
