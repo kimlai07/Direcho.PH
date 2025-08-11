@@ -12,7 +12,8 @@ import {
   Alert,
   Paper,
   Divider,
-  Stack
+  Stack,
+  Button
 } from '@mui/material';
 import {
   ArrowBackIos,
@@ -21,7 +22,8 @@ import {
   Speed,
   LocalGasStation,
   DirectionsCar,
-  CalendarToday
+  CalendarToday,
+  OpenInNew
 } from '@mui/icons-material';
 import { getVehicleById } from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
@@ -79,12 +81,26 @@ const CarDetails: React.FC = () => {
     }
   };
 
+  const handleGoogleDriveClick = () => {
+    if (car?.googleDriveUrl) {
+      window.open(car.googleDriveUrl, '_blank');
+    }
+  };
+
   const defaultImage = 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress size={60} />
+        <CircularProgress 
+          size={60} 
+          sx={{ 
+            color: '#F78C1F',
+            '& .MuiCircularProgress-circle': {
+              strokeLinecap: 'round',
+            }
+          }} 
+        />
       </Box>
     );
   }
@@ -92,7 +108,18 @@ const CarDetails: React.FC = () => {
   if (error || !car) {
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Alert severity="error">{error || 'Car not found'}</Alert>
+        <Alert 
+          severity="error"
+          sx={{
+            backgroundColor: '#FFE6E6',
+            color: '#0F4C81',
+            '& .MuiAlert-icon': {
+              color: '#F78C1F'
+            }
+          }}
+        >
+          {error || 'Car not found'}
+        </Alert>
       </Container>
     );
   }
@@ -111,7 +138,14 @@ const CarDetails: React.FC = () => {
           width: { xs: '100%', lg: '65%' },
           maxWidth: '800px'
         }}>
-          <Card elevation={3} sx={{ overflow: 'hidden' }}>
+          <Card 
+            elevation={3} 
+            sx={{ 
+              overflow: 'hidden',
+              border: '1px solid #E8E8E8',
+              borderRadius: '12px'
+            }}
+          >
             <Box position="relative">
               <Box
                 component="img"
@@ -140,13 +174,15 @@ const CarDetails: React.FC = () => {
                       left: { xs: 8, md: 16 },
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
                       color: 'white',
                       '&:hover': {
-                        backgroundColor: 'rgba(0,0,0,0.8)'
+                        background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
+                        transform: 'translateY(-50%) scale(1.1)',
                       },
                       width: { xs: 40, md: 48 },
-                      height: { xs: 40, md: 48 }
+                      height: { xs: 40, md: 48 },
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     <ArrowBackIos fontSize="inherit" />
@@ -160,13 +196,15 @@ const CarDetails: React.FC = () => {
                       right: { xs: 8, md: 16 },
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      backgroundColor: 'rgba(0,0,0,0.6)',
+                      background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
                       color: 'white',
                       '&:hover': {
-                        backgroundColor: 'rgba(0,0,0,0.8)'
+                        background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
+                        transform: 'translateY(-50%) scale(1.1)',
                       },
                       width: { xs: 40, md: 48 },
-                      height: { xs: 40, md: 48 }
+                      height: { xs: 40, md: 48 },
+                      transition: 'all 0.3s ease'
                     }}
                   >
                     <ArrowForwardIos fontSize="inherit" />
@@ -183,12 +221,12 @@ const CarDetails: React.FC = () => {
                   right: { xs: 8, md: 16 },
                   px: { xs: 1.5, md: 2 },
                   py: { xs: 0.5, md: 1 },
-                  backgroundColor: 'rgba(0,0,0,0.7)',
+                  background: 'linear-gradient(135deg, #0F4C81, #0A3A6B)',
                   color: 'white',
-                  borderRadius: 1
+                  borderRadius: 2
                 }}
               >
-                <Typography variant="caption" fontSize={{ xs: '0.7rem', md: '0.75rem' }}>
+                <Typography variant="caption" fontSize={{ xs: '0.7rem', md: '0.75rem' }} fontWeight="medium">
                   {currentImageIndex + 1} / {images.length}
                 </Typography>
               </Paper>
@@ -207,11 +245,11 @@ const CarDetails: React.FC = () => {
                 height: 6,
               },
               '&::-webkit-scrollbar-track': {
-                backgroundColor: 'grey.200',
+                backgroundColor: '#F5F5F5',
                 borderRadius: 3,
               },
               '&::-webkit-scrollbar-thumb': {
-                backgroundColor: 'grey.400',
+                background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
                 borderRadius: 3,
               }
             }}>
@@ -226,16 +264,18 @@ const CarDetails: React.FC = () => {
                     width: { xs: 60, sm: 80 },
                     height: { xs: 45, sm: 60 },
                     objectFit: 'cover',
-                    borderRadius: 1,
+                    borderRadius: 2,
                     cursor: 'pointer',
                     border: 2,
-                    borderColor: currentImageIndex === index ? 'primary.main' : 'transparent',
+                    borderColor: currentImageIndex === index ? '#F78C1F' : '#E8E8E8',
                     opacity: currentImageIndex === index ? 1 : 0.7,
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.3s ease',
                     flexShrink: 0,
                     '&:hover': {
                       opacity: 1,
-                      transform: 'scale(1.05)'
+                      transform: 'scale(1.05)',
+                      borderColor: '#F78C1F',
+                      boxShadow: '0 4px 12px rgba(247, 140, 31, 0.3)'
                     }
                   }}
                 />
@@ -251,7 +291,14 @@ const CarDetails: React.FC = () => {
           position: { lg: 'sticky' },
           top: { lg: 20 }
         }}>
-          <Card elevation={3}>
+          <Card 
+            elevation={3}
+            sx={{
+              border: '1px solid #E8E8E8',
+              borderRadius: '12px',
+              background: 'linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%)'
+            }}
+          >
             <CardContent sx={{ p: { xs: 2, md: 3 } }}>
               <Typography 
                 variant="h4" 
@@ -259,83 +306,120 @@ const CarDetails: React.FC = () => {
                 gutterBottom 
                 fontWeight="bold"
                 fontSize={{ xs: '1.5rem', sm: '2rem', md: '2.125rem' }}
+                sx={{ color: '#0F4C81' }}
               >
                 {car.brand} {car.model}
               </Typography>
               
               <Typography 
                 variant="h5" 
-                color="primary" 
                 gutterBottom 
                 fontWeight="bold"
                 fontSize={{ xs: '1.25rem', sm: '1.5rem' }}
+                sx={{ color: '#F78C1F' }}
               >
                 {formatPrice(car.purchasePrice)}
               </Typography>
 
               <Chip 
                 label={car.purchaseStatus} 
-                color={car.purchaseStatus === 'AVAILABLE' ? 'success' : 'default'}
-                sx={{ mb: 3, fontWeight: 'medium' }}
+                sx={{ 
+                  mb: 3, 
+                  fontWeight: 'medium',
+                  backgroundColor: car.purchaseStatus === 'AVAILABLE' ? '#E8F5E8' : '#F5F5F5',
+                  color: car.purchaseStatus === 'AVAILABLE' ? '#2E7D32' : '#666666',
+                  border: `1px solid ${car.purchaseStatus === 'AVAILABLE' ? '#4CAF50' : '#CCCCCC'}`
+                }}
               />
 
-              <Divider sx={{ mb: 3 }} />
+              {/* Google Drive Button */}
+              {car.googleDriveUrl && (
+                <Button
+                  variant="contained"
+                  startIcon={<OpenInNew />}
+                  onClick={handleGoogleDriveClick}
+                  sx={{
+                    mb: 3,
+                    width: '100%',
+                    py: 1.5,
+                    fontWeight: 'medium',
+                    fontSize: { xs: '0.9rem', md: '1rem' },
+                    background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
+                    color: 'white',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 6px 20px rgba(247, 140, 31, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  Download Images
+                </Button>
+              )}
+
+              <Divider sx={{ mb: 3, backgroundColor: '#E8E8E8' }} />
 
               <Stack spacing={2.5}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <CalendarToday color="action" fontSize="small" />
-                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }}>
-                    <strong>Year:</strong> {car.year}
+                  <CalendarToday sx={{ color: '#F78C1F', fontSize: '1.2rem' }} />
+                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Year:</strong> <span style={{ color: '#666666' }}>{car.year}</span>
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Speed color="action" fontSize="small" />
-                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }}>
-                    <strong>Mileage:</strong> {car.mileage} km
+                  <Speed sx={{ color: '#F78C1F', fontSize: '1.2rem' }} />
+                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Mileage:</strong> <span style={{ color: '#666666' }}>{car.mileage} km</span>
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <LocalGasStation color="action" fontSize="small" />
-                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }}>
-                    <strong>Fuel Type:</strong> {car.fuelType}
+                  <LocalGasStation sx={{ color: '#F78C1F', fontSize: '1.2rem' }} />
+                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Fuel Type:</strong> <span style={{ color: '#666666' }}>{car.fuelType}</span>
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <DirectionsCar color="action" fontSize="small" />
-                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }}>
-                    <strong>Transmission:</strong> {car.transmission}
+                  <DirectionsCar sx={{ color: '#F78C1F', fontSize: '1.2rem' }} />
+                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Transmission:</strong> <span style={{ color: '#666666' }}>{car.transmission}</span>
                   </Typography>
                 </Box>
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <LocationOn color="action" fontSize="small" />
-                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }}>
-                    <strong>Location:</strong> {car.location}
+                  <LocationOn sx={{ color: '#F78C1F', fontSize: '1.2rem' }} />
+                  <Typography variant="body1" fontSize={{ xs: '0.9rem', md: '1rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Location:</strong> <span style={{ color: '#666666' }}>{car.location}</span>
                   </Typography>
                 </Box>
               </Stack>
 
-              <Divider sx={{ my: 3 }} />
+              <Divider sx={{ my: 3, backgroundColor: '#E8E8E8' }} />
 
               <Stack spacing={1}>
-                <Typography variant="body2" color="text.secondary" fontSize={{ xs: '0.85rem', md: '0.875rem' }}>
-                  <strong>Color:</strong> {car.color}
+                <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                  <strong>Color:</strong> <span style={{ color: '#666666' }}>{car.color}</span>
                 </Typography>
-                <Typography variant="body2" color="text.secondary" fontSize={{ xs: '0.85rem', md: '0.875rem' }}>
-                  <strong>Body Type:</strong> {car.bodyType}
+                <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                  <strong>Body Type:</strong> <span style={{ color: '#666666' }}>{car.bodyType}</span>
                 </Typography>
-                <Typography variant="body2" color="text.secondary" fontSize={{ xs: '0.85rem', md: '0.875rem' }}>
-                  <strong>Variant:</strong> {car.variant}
+                <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                  <strong>Variant:</strong> <span style={{ color: '#666666' }}>{car.variant}</span>
                 </Typography>
-                <Typography variant="body2" color="text.secondary" fontSize={{ xs: '0.85rem', md: '0.875rem' }}>
-                  <strong>VIN:</strong> {car.vin}
+                <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                  <strong>VIN:</strong> <span style={{ color: '#666666' }}>{car.vin}</span>
                 </Typography>
-                <Typography variant="body2" color="text.secondary" fontSize={{ xs: '0.85rem', md: '0.875rem' }}>
-                  <strong>Dealer:</strong> {car.dealerName}
-                </Typography>
+                {/* <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                  <strong>Dealer:</strong> <span style={{ color: '#666666' }}>{car.dealerName}</span>
+                </Typography> */}
               </Stack>
             </CardContent>
           </Card>

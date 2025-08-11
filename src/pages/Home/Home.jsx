@@ -3,10 +3,12 @@ import SearchBar from '../../components/SearchBar/SearchBar';
 import CarCard from '../../components/CarCard/CarCard';
 import { fetchVehicles } from '../../services/api';
 import './Home.css';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getVehicles = async () => {
@@ -85,7 +87,9 @@ const Home = () => {
             </div>
           )}
           <div className="view-all-container">
-            <button className="view-all-btn">View All Cars</button>
+            <button className="view-all-btn" onClick={() => navigate('/cars')}>
+              View All Cars
+            </button>
           </div>
         </div>
       </div>

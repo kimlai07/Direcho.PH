@@ -47,14 +47,14 @@ const Header = () => {
               Calculate
             </Link>
           </li>
-          <li>
+          {/* <li>
             <Link 
               to="/profile"
               className={location.pathname === '/profile' ? 'active' : ''}
             >
               Profile
             </Link>
-          </li>
+          </li> */}
         </ul>
       </nav>
     </header>
