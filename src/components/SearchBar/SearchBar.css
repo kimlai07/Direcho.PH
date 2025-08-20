@@ -137,6 +137,42 @@
     transform: translateY(-1px);
     box-shadow: 0 3px 10px rgba(15, 76, 129, 0.3);
   }
+
+.search-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.clear-button {
+  background: transparent;
+  color: #0F4C81;
+  border: 2px solid #0F4C81;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 120px;
+}
+
+.clear-button:hover {
+  background: #0F4C81;
+  color: white;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .search-buttons {
+    flex-direction: column;
+  }
+  
+  .clear-button {
+    max-width: 100%;
+  }
+}
   
   /* Mobile Styles */
   @media (max-width: 768px) {

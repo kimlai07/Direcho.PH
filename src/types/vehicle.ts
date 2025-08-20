@@ -32,6 +32,8 @@ export interface Vehicle {
   vin: string;
   fuelType: string;
   bodyType: string;
+  maxLoanPercentage: string | null;
+  maxMonthlyTerms: string | null;
 }
 
 export interface ApiResponse<T> {

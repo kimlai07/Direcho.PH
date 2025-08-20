@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './SearchBar.css';
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ onSearch, onClear }) => {
     const [activeTab, setActiveTab] = useState('buy');
     const [searchTerm, setSearchTerm] = useState('');
     const [budget, setBudget] = useState('');
@@ -10,6 +10,15 @@ const SearchBar = ({ onSearch }) => {
     const handleSearch = (event) => {
         event.preventDefault();
         onSearch({ searchTerm, budget, city, type: activeTab });
+    };
+
+    const handleClearSearch = () => {
+        setSearchTerm('');
+        setBudget('');
+        setCity('');
+        if (onClear) {
+            onClear();
+        }
     };
 
     return (
@@ -58,9 +67,18 @@ const SearchBar = ({ onSearch }) => {
                             />
                         </div>
                     </div>
-                    <button type="submit" className="search-button">
-                        Search Cars
-                    </button>
+                    <div className="search-buttons">
+                        <button type="submit" className="search-button">
+                            Search Cars
+                        </button>
+                        <button 
+                            type="button" 
+                            className="clear-button" 
+                            onClick={handleClearSearch}
+                        >
+                            Clear
+                        </button>
+                    </div>
                 </form>
             ) : (
                 <div className="sell-form">

@@ -13,7 +13,9 @@ import {
   Paper,
   Divider,
   Stack,
-  Button
+  Button,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   ArrowBackIos,
@@ -23,11 +25,35 @@ import {
   LocalGasStation,
   DirectionsCar,
   CalendarToday,
-  OpenInNew
+  OpenInNew,
+  PhotoLibrary,
+  PlayCircle
 } from '@mui/icons-material';
 import { getVehicleById } from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
 import './CarDetails.css';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`media-tabpanel-${index}`}
+      aria-labelledby={`media-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box>{children}</Box>}
+    </div>
+  );
+}
 
 const CarDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -35,6 +61,7 @@ const CarDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     const fetchCarDetails = async () => {
@@ -87,6 +114,19 @@ const CarDetails: React.FC = () => {
     }
   };
 
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null;
+    
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
   const defaultImage = 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
 
   if (loading) {
@@ -125,6 +165,8 @@ const CarDetails: React.FC = () => {
   }
 
   const images = car.photoUrls.length > 0 ? car.photoUrls : [defaultImage];
+  const youtubeVideoId = car.videoUrl ? getYouTubeVideoId(car.videoUrl) : null;
+  const hasVideo = !!youtubeVideoId;
 
   return (
     <Container maxWidth="xl" sx={{ py: { xs: 2, md: 4 } }}>
@@ -133,154 +175,233 @@ const CarDetails: React.FC = () => {
         spacing={{ xs: 3, md: 4 }}
         alignItems="flex-start"
       >
-        {/* Image Slideshow */}
+        {/* Media Section (Images & Video) */}
         <Box sx={{ 
           width: { xs: '100%', lg: '65%' },
           maxWidth: '800px'
         }}>
-          <Card 
-            elevation={3} 
-            sx={{ 
-              overflow: 'hidden',
-              border: '1px solid #E8E8E8',
-              borderRadius: '12px'
-            }}
-          >
-            <Box position="relative">
-              <Box
-                component="img"
-                src={images[currentImageIndex]}
-                alt={`${car.brand} ${car.model} - Image ${currentImageIndex + 1}`}
+          {/* Tabs for Media */}
+          {hasVideo && (
+            <Box sx={{ borderBottom: 1, borderColor: '#E8E8E8', mb: 2 }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={handleTabChange}
                 sx={{
-                  width: '100%',
-                  height: { xs: 250, sm: 350, md: 450, lg: 500 },
-                  objectFit: 'cover',
-                  display: 'block'
-                }}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = defaultImage;
-                }}
-              />
-              
-              {/* Navigation Arrows */}
-              {images.length > 1 && (
-                <>
-                  <IconButton
-                    onClick={handlePrevImage}
-                    size="large"
-                    sx={{
-                      position: 'absolute',
-                      left: { xs: 8, md: 16 },
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
-                      color: 'white',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
-                        transform: 'translateY(-50%) scale(1.1)',
-                      },
-                      width: { xs: 40, md: 48 },
-                      height: { xs: 40, md: 48 },
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <ArrowBackIos fontSize="inherit" />
-                  </IconButton>
-                  
-                  <IconButton
-                    onClick={handleNextImage}
-                    size="large"
-                    sx={{
-                      position: 'absolute',
-                      right: { xs: 8, md: 16 },
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
-                      color: 'white',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
-                        transform: 'translateY(-50%) scale(1.1)',
-                      },
-                      width: { xs: 40, md: 48 },
-                      height: { xs: 40, md: 48 },
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    <ArrowForwardIos fontSize="inherit" />
-                  </IconButton>
-                </>
-              )}
-              
-              {/* Image Counter */}
-              <Paper
-                elevation={2}
-                sx={{
-                  position: 'absolute',
-                  bottom: { xs: 8, md: 16 },
-                  right: { xs: 8, md: 16 },
-                  px: { xs: 1.5, md: 2 },
-                  py: { xs: 0.5, md: 1 },
-                  background: 'linear-gradient(135deg, #0F4C81, #0A3A6B)',
-                  color: 'white',
-                  borderRadius: 2
+                  '& .MuiTab-root': {
+                    color: '#666666',
+                    fontWeight: 'medium',
+                    textTransform: 'none',
+                    fontSize: '1rem'
+                  },
+                  '& .Mui-selected': {
+                    color: '#F78C1F !important'
+                  },
+                  '& .MuiTabs-indicator': {
+                    backgroundColor: '#F78C1F'
+                  }
                 }}
               >
-                <Typography variant="caption" fontSize={{ xs: '0.7rem', md: '0.75rem' }} fontWeight="medium">
-                  {currentImageIndex + 1} / {images.length}
-                </Typography>
-              </Paper>
+                <Tab 
+                  icon={<PhotoLibrary />} 
+                  label="Photos" 
+                  iconPosition="start"
+                  sx={{ minHeight: 48 }}
+                />
+                <Tab 
+                  icon={<PlayCircle />} 
+                  label="Video" 
+                  iconPosition="start"
+                  sx={{ minHeight: 48 }}
+                />
+              </Tabs>
             </Box>
-          </Card>
+          )}
 
-          {/* Thumbnail Strip */}
-          {images.length > 1 && (
-            <Box sx={{ 
-              mt: 2, 
-              display: 'flex', 
-              gap: 1, 
-              overflowX: 'auto', 
-              pb: 1,
-              '&::-webkit-scrollbar': {
-                height: 6,
-              },
-              '&::-webkit-scrollbar-track': {
-                backgroundColor: '#F5F5F5',
-                borderRadius: 3,
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
-                borderRadius: 3,
-              }
-            }}>
-              {images.map((image, index) => (
+          {/* Photos Tab */}
+          <TabPanel value={tabValue} index={0}>
+            <Card 
+              elevation={3} 
+              sx={{ 
+                overflow: 'hidden',
+                border: '1px solid #E8E8E8',
+                borderRadius: '12px'
+              }}
+            >
+              <Box position="relative">
                 <Box
-                  key={index}
                   component="img"
-                  src={image}
-                  alt={`Thumbnail ${index + 1}`}
-                  onClick={() => setCurrentImageIndex(index)}
+                  src={images[currentImageIndex]}
+                  alt={`${car.brand} ${car.model} - Image ${currentImageIndex + 1}`}
                   sx={{
-                    width: { xs: 60, sm: 80 },
-                    height: { xs: 45, sm: 60 },
+                    width: '100%',
+                    height: { xs: 250, sm: 350, md: 450, lg: 500 },
                     objectFit: 'cover',
-                    borderRadius: 2,
-                    cursor: 'pointer',
-                    border: 2,
-                    borderColor: currentImageIndex === index ? '#F78C1F' : '#E8E8E8',
-                    opacity: currentImageIndex === index ? 1 : 0.7,
-                    transition: 'all 0.3s ease',
-                    flexShrink: 0,
-                    '&:hover': {
-                      opacity: 1,
-                      transform: 'scale(1.05)',
-                      borderColor: '#F78C1F',
-                      boxShadow: '0 4px 12px rgba(247, 140, 31, 0.3)'
-                    }
+                    display: 'block'
+                  }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.src = defaultImage;
                   }}
                 />
-              ))}
-            </Box>
+                
+                {/* Navigation Arrows */}
+                {images.length > 1 && (
+                  <>
+                    <IconButton
+                      onClick={handlePrevImage}
+                      size="large"
+                      sx={{
+                        position: 'absolute',
+                        left: { xs: 8, md: 16 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
+                        color: 'white',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
+                          transform: 'translateY(-50%) scale(1.1)',
+                        },
+                        width: { xs: 40, md: 48 },
+                        height: { xs: 40, md: 48 },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <ArrowBackIos fontSize="inherit" />
+                    </IconButton>
+                    
+                    <IconButton
+                      onClick={handleNextImage}
+                      size="large"
+                      sx={{
+                        position: 'absolute',
+                        right: { xs: 8, md: 16 },
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
+                        color: 'white',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #E07B0E, #D06D0A)',
+                          transform: 'translateY(-50%) scale(1.1)',
+                        },
+                        width: { xs: 40, md: 48 },
+                        height: { xs: 40, md: 48 },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <ArrowForwardIos fontSize="inherit" />
+                    </IconButton>
+                  </>
+                )}
+                
+                {/* Image Counter */}
+                <Paper
+                  elevation={2}
+                  sx={{
+                    position: 'absolute',
+                    bottom: { xs: 8, md: 16 },
+                    right: { xs: 8, md: 16 },
+                    px: { xs: 1.5, md: 2 },
+                    py: { xs: 0.5, md: 1 },
+                    background: 'linear-gradient(135deg, #0F4C81, #0A3A6B)',
+                    color: 'white',
+                    borderRadius: 2
+                  }}
+                >
+                  <Typography variant="caption" fontSize={{ xs: '0.7rem', md: '0.75rem' }} fontWeight="medium">
+                    {currentImageIndex + 1} / {images.length}
+                  </Typography>
+                </Paper>
+              </Box>
+            </Card>
+
+            {/* Thumbnail Strip */}
+            {images.length > 1 && (
+              <Box sx={{ 
+                mt: 2, 
+                display: 'flex', 
+                gap: 1, 
+                overflowX: 'auto', 
+                pb: 1,
+                '&::-webkit-scrollbar': {
+                  height: 6,
+                },
+                '&::-webkit-scrollbar-track': {
+                  backgroundColor: '#F5F5F5',
+                  borderRadius: 3,
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'linear-gradient(135deg, #F78C1F, #E07B0E)',
+                  borderRadius: 3,
+                }
+              }}>
+                {images.map((image, index) => (
+                  <Box
+                    key={index}
+                    component="img"
+                    src={image}
+                    alt={`Thumbnail ${index + 1}`}
+                    onClick={() => setCurrentImageIndex(index)}
+                    sx={{
+                      width: { xs: 60, sm: 80 },
+                      height: { xs: 45, sm: 60 },
+                      objectFit: 'cover',
+                      borderRadius: 2,
+                      cursor: 'pointer',
+                      border: 2,
+                      borderColor: currentImageIndex === index ? '#F78C1F' : '#E8E8E8',
+                      opacity: currentImageIndex === index ? 1 : 0.7,
+                      transition: 'all 0.3s ease',
+                      flexShrink: 0,
+                      '&:hover': {
+                        opacity: 1,
+                        transform: 'scale(1.05)',
+                        borderColor: '#F78C1F',
+                        boxShadow: '0 4px 12px rgba(247, 140, 31, 0.3)'
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </TabPanel>
+
+          {/* Video Tab */}
+          {hasVideo && (
+            <TabPanel value={tabValue} index={1}>
+              <Card 
+                elevation={3} 
+                sx={{ 
+                  overflow: 'hidden',
+                  border: '1px solid #E8E8E8',
+                  borderRadius: '12px'
+                }}
+              >
+                <Box 
+                  sx={{
+                    position: 'relative',
+                    paddingBottom: '56.25%', // 16:9 aspect ratio
+                    height: 0,
+                    overflow: 'hidden'
+                  }}
+                >
+                  <iframe
+                    src={`https://www.youtube.com/embed/${youtubeVideoId}?rel=0&modestbranding=1`}
+                    title={`${car.brand} ${car.model} Video`}
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '12px'
+                    }}
+                  />
+                </Box>
+              </Card>
+            </TabPanel>
           )}
         </Box>
 
@@ -417,9 +538,16 @@ const CarDetails: React.FC = () => {
                 <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
                   <strong>VIN:</strong> <span style={{ color: '#666666' }}>{car.vin}</span>
                 </Typography>
-                {/* <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
-                  <strong>Dealer:</strong> <span style={{ color: '#666666' }}>{car.dealerName}</span>
-                </Typography> */}
+                {car.maxLoanPercentage && (
+                  <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Max Loan Percentage:</strong> <span style={{ color: '#666666' }}>{car.maxLoanPercentage}%</span>
+                  </Typography>
+                )}
+                {car.maxMonthlyTerms && (
+                  <Typography variant="body2" fontSize={{ xs: '0.85rem', md: '0.875rem' }} sx={{ color: '#0F4C81' }}>
+                    <strong>Max Monthly Terms:</strong> <span style={{ color: '#666666' }}>{car.maxMonthlyTerms} months</span>
+                  </Typography>
+                )}
               </Stack>
             </CardContent>
           </Card>

@@ -5,7 +5,8 @@ import { Vehicle, ApiResponse } from '../types/vehicle';
 const privateUrlVehicle = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle';
 const prodUrlVehicle = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/bentacars/vehicle?lastMonthOnly=true';
 const prodUrlVehicleAllCars = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/bentacars/vehicle?filterSold=true';
-const newProdVehicleUrl = 'https://b6f0c09yu4.execute-api.ap-east-1.amazonaws.com/Prod/vehicles';
+const newProdVehicleUrls = 'https://b6f0c09yu4.execute-api.ap-east-1.amazonaws.com/Prod/vehicles';
+const newProdVehicleUrl = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle'
 
 // Mock data
 const mockVehicles = [
@@ -222,46 +223,50 @@ export const fetchUserCars = async () => {
 
 export const searchVehicles = async (searchParams) => {
     if (USE_MOCK_DATA) {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Your existing mock implementation...
+        // (keep the existing mock code as is)
+    }
+    
+    try {
+        // Build query parameters for real API
+        const params = new URLSearchParams();
         
-        let filteredVehicles = [...mockVehicles];
-        
-        // Filter by search term
         if (searchParams.searchTerm) {
-            const term = searchParams.searchTerm.toLowerCase();
-            filteredVehicles = filteredVehicles.filter(car => 
-                car.make.toLowerCase().includes(term) ||
-                car.model.toLowerCase().includes(term)
-            );
+            params.append('search', searchParams.searchTerm);
         }
         
-        // Filter by budget
         if (searchParams.budget) {
-            const [min, max] = searchParams.budget.split('-').map(Number);
-            if (max) {
-                filteredVehicles = filteredVehicles.filter(car => 
-                    car.price >= min && car.price <= max
-                );
-            } else {
-                filteredVehicles = filteredVehicles.filter(car => car.price >= min);
+            const [min, max] = searchParams.budget.split('-').map(val => val.replace('+', ''));
+            params.append('minPrice', min);
+            if (max && max !== min) {
+                params.append('maxPrice', max);
             }
         }
         
-        // Filter by city
         if (searchParams.city) {
-            const city = searchParams.city.toLowerCase();
-            filteredVehicles = filteredVehicles.filter(car => 
-                car.location.toLowerCase().includes(city)
-            );
+            params.append('location', searchParams.city);
         }
         
-        return filteredVehicles;
+        const url = `${newProdVehicleUrl}?${params.toString()}`;
+        console.log('Search URL:', url);
+        
+        const response = await axios.get(url);
+        return response.data;
+    } catch (error) {
+        console.error('Error searching vehicles:', error);
+        
+        // Fallback to all vehicles if search fails
+        try {
+            const response = await axios.get(newProdVehicleUrl);
+            return response.data;
+        } catch (fallbackError) {
+            console.error('Fallback API call failed:', fallbackError);
+            throw fallbackError;
+        }
     }
-    
-    // Future: implement actual search API call
-    return mockVehicles;
 };
+
+
 
 const api = {
     fetchVehicles,

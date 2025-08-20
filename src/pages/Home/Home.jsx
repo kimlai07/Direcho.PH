@@ -25,10 +25,9 @@ const Home = () => {
     getVehicles();
   }, []);
 
-  const handleSearch = (searchTerm) => {
-    console.log('Search term:', searchTerm);
+  const handleSearch = (searchParams) => {
+    navigate('/cars', { state: { searchParams } });
   };
-
   return (
     <div className="home">
       {/* Mobile Hero Section */}
