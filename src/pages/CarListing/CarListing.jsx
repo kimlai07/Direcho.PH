@@ -1,66 +1,77 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import CarCard from '../../components/CarCard/CarCard';
 import SearchBar from '../../components/SearchBar/SearchBar';
-import FilterPanel from '../../components/FilterPanel/FilterPanel';
-import { fetchAllCars, searchVehicles } from '../../services/api';
+import { fetchAllCars } from '../../services/api';
 import './CarListing.css';
 
 const CarListing = () => {
   const [cars, setCars] = useState([]);
+  const [allCars, setAllCars] = useState([]); // Master list of all cars
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
+  const location = useLocation();
 
+  // 1. Fetch all cars only once when the component mounts
   useEffect(() => {
-    const fetchCars = async () => {
+    const fetchInitialCars = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const data = await fetchAllCars();
-        setCars(data);
-      } catch (error) {
-        setError(error.message);
+        setAllCars(data); // Store the master list
+        setCars(data);    // Set the initial list to display
+      } catch (err) {
+        setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCars();
+    fetchInitialCars();
   }, []);
 
-  const handleSearch = async (searchParams) => {
-    console.log('Search params:', searchParams);
-    setIsSearching(true);
-    setError(null);
-    
-    try {
-      let results;
-      
-      // If no search parameters, fetch all cars
-      if (!searchParams.searchTerm && !searchParams.budget && !searchParams.city) {
-        results = await fetchAllCars();
-      } else {
-        // Use search API with parameters
-        results = await searchVehicles(searchParams);
-      }
-      
-      setCars(results);
-    } catch (error) {
-      setError('Error searching cars: ' + error.message);
-      console.error('Search error:', error);
-    } finally {
-      setIsSearching(false);
+  // 2. Handle searches passed from other pages (e.g., Home)
+  useEffect(() => {
+    const initialSearchParams = location.state?.searchParams;
+    if (hasSearchParams(initialSearchParams) && allCars.length > 0) {
+      handleSearch(initialSearchParams);
     }
+  }, [location.state, allCars]);
+
+  // Helper to check if any search parameters are active
+  const hasSearchParams = (params) => {
+    if (!params) return false;
+    return Object.values(params).some(value => value && value !== '');
   };
 
-  const handleClearSearch = async () => {
-    setLoading(true);
-    try {
-      const data = await fetchAllCars();
-      setCars(data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
+  // 3. Perform search on the client-side using the 'allCars' state
+  const handleSearch = (searchParams) => {
+    setIsSearching(true);
+    
+    let filteredData = [...allCars];
+
+    // Filter by wildcard searchTerm
+    if (searchParams.searchTerm) {
+      const lowercasedTerm = searchParams.searchTerm.toLowerCase();
+      filteredData = filteredData.filter(car => 
+        (car.brand && car.brand.toLowerCase().includes(lowercasedTerm)) ||
+        (car.model && car.model.toLowerCase().includes(lowercasedTerm)) ||
+        (car.year && car.year.toString().includes(lowercasedTerm)) ||
+        (car.variant && car.variant.toLowerCase().includes(lowercasedTerm)) ||
+        (car.bodyType && car.bodyType.toLowerCase().includes(lowercasedTerm)) ||
+        (car.vin && car.vin.toLowerCase().includes(lowercasedTerm))
+      );
     }
+
+    setCars(filteredData);
+    setIsSearching(false);
+  };
+
+  // 4. Clear the search by resetting to the full list of cars
+  const handleClearSearch = () => {
+    setCars(allCars);
   };
 
   if (loading) {

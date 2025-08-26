@@ -5,8 +5,8 @@ import { Vehicle, ApiResponse } from '../types/vehicle';
 const privateUrlVehicle = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle';
 const prodUrlVehicle = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/bentacars/vehicle?lastMonthOnly=true';
 const prodUrlVehicleAllCars = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/bentacars/vehicle?filterSold=true';
-const newProdVehicleUrls = 'https://b6f0c09yu4.execute-api.ap-east-1.amazonaws.com/Prod/vehicles';
-const newProdVehicleUrl = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle'
+const newProdVehicleUrl= 'https://b6f0c09yu4.execute-api.ap-east-1.amazonaws.com/Prod/vehicles';
+const newProdVehicleUrls = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle'
 
 // Mock data
 const mockVehicles = [
@@ -108,6 +108,7 @@ export const fetchVehicles = async () => {
     
     try {
         const response = await axios.get(newProdVehicleUrl);
+        console.log('Fetched vehicles:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error fetching vehicles:', error);
@@ -221,61 +222,13 @@ export const fetchUserCars = async () => {
     return [];
 };
 
-export const searchVehicles = async (searchParams) => {
-    if (USE_MOCK_DATA) {
-        // Your existing mock implementation...
-        // (keep the existing mock code as is)
-    }
-    
-    try {
-        // Build query parameters for real API
-        const params = new URLSearchParams();
-        
-        if (searchParams.searchTerm) {
-            params.append('search', searchParams.searchTerm);
-        }
-        
-        if (searchParams.budget) {
-            const [min, max] = searchParams.budget.split('-').map(val => val.replace('+', ''));
-            params.append('minPrice', min);
-            if (max && max !== min) {
-                params.append('maxPrice', max);
-            }
-        }
-        
-        if (searchParams.city) {
-            params.append('location', searchParams.city);
-        }
-        
-        const url = `${newProdVehicleUrl}?${params.toString()}`;
-        console.log('Search URL:', url);
-        
-        const response = await axios.get(url);
-        return response.data;
-    } catch (error) {
-        console.error('Error searching vehicles:', error);
-        
-        // Fallback to all vehicles if search fails
-        try {
-            const response = await axios.get(newProdVehicleUrl);
-            return response.data;
-        } catch (fallbackError) {
-            console.error('Fallback API call failed:', fallbackError);
-            throw fallbackError;
-        }
-    }
-};
-
-
-
 const api = {
     fetchVehicles,
     fetchAllCars,
     fetchNewVehicles,
     getVehicleById,
     fetchUserProfile,
-    fetchUserCars,
-    searchVehicles
+    fetchUserCars
 };
 
 export default api;

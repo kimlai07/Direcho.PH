@@ -48,26 +48,8 @@ const SearchBar = ({ onSearch, onClear }) => {
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                            
                         </div>
-                        <div className="input-group">
-                            <select value={budget} onChange={(e) => setBudget(e.target.value)}>
-                                <option value="">Select Budget</option>
-                                <option value="0-500000">Under ₱500,000</option>
-                                <option value="500000-1000000">₱500,000 - ₱1,000,000</option>
-                                <option value="1000000-2000000">₱1,000,000 - ₱2,000,000</option>
-                                <option value="2000000+">Above ₱2,000,000</option>
-                            </select>
-                        </div>
-                        <div className="input-group">
-                            <input
-                                type="text"
-                                placeholder="Enter your city"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                    <div className="search-buttons">
                         <button type="submit" className="search-button">
                             Search Cars
                         </button>
