@@ -1,9 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './CarCard.css';
-import { Card, CardContent, CardMedia, Typography, CircularProgress, Alert, Box } from '@mui/material';
+import { Card, CardContent, Typography, CircularProgress, Alert, Box } from '@mui/material';
 import { Vehicle } from '../../types/vehicle';
 import { JSX } from 'react/jsx-runtime';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 interface CarCardProps {
   car: Vehicle;
@@ -75,20 +76,19 @@ const CarCard = ({ car, loading = false, error }: CarCardProps): JSX.Element => 
           }
         }}
       >
-        <CardMedia
-          component="img"
-          height="200"
-          image={car.thumbnailUrl || car.photoUrls[0] || defaultImage}
-          alt={`${car.brand} ${car.model}`}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = defaultImage;
-          }}
-          sx={{
-            objectFit: 'cover',
-            borderRadius: '12px 12px 0 0'
-          }}
-        />
+        <Box sx={{ borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+          <OptimizedImage
+            src={car.thumbnailUrl || car.photoUrls[0] || defaultImage}
+            alt={`${car.brand} ${car.model}`}
+            width={400}
+            height={200}
+            objectFit="cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = defaultImage;
+            }}
+          />
+        </Box>
         <CardContent sx={{ p: 2.5 }}>
           <Typography 
             variant="h5" 

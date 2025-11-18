@@ -99,86 +99,67 @@
   box-shadow: 0 3px 10px rgba(247, 140, 31, 0.3);
 }
 
-/* Pagination Styles */
-.pagination-container {
+/* Infinite Scroll Styles */
+.loading-more {
+  text-align: center;
+  padding: 30px 20px;
+  grid-column: 1 / -1;
+}
+
+.loading-spinner-small {
+  color: #F78C1F;
+  font-size: 16px;
+  font-weight: 600;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  margin-top: 50px;
-  padding: 20px 0;
-  flex-wrap: wrap;
 }
 
-.pagination-btn {
-  padding: 10px 20px;
-  background: white;
-  border: 2px solid #F78C1F;
-  color: #F78C1F;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 100px;
+.loading-spinner-small::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  border: 3px solid #F5F5F5;
+  border-top-color: #F78C1F;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.pagination-btn:hover:not(:disabled) {
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
   background: linear-gradient(135deg, #F78C1F, #E07B0E);
   color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgba(247, 140, 31, 0.3);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  border-color: #CCCCCC;
-  color: #CCCCCC;
-}
-
-.pagination-numbers {
-  display: flex;
-  gap: 5px;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.pagination-number {
-  width: 40px;
-  height: 40px;
-  border: 2px solid #E8E8E8;
-  background: white;
-  color: #0F4C81;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pagination-number:hover {
-  border-color: #F78C1F;
-  color: #F78C1F;
-  transform: scale(1.1);
-}
-
-.pagination-number.active {
-  background: linear-gradient(135deg, #F78C1F, #E07B0E);
-  color: white;
-  border-color: #F78C1F;
-  transform: scale(1.1);
-  box-shadow: 0 3px 10px rgba(247, 140, 31, 0.3);
-}
-
-.pagination-ellipsis {
-  color: #666666;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
   font-weight: bold;
-  padding: 0 5px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(247, 140, 31, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-to-top:hover {
+  background: linear-gradient(135deg, #E07B0E, #D06D0A);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(247, 140, 31, 0.5);
+}
+
+.scroll-to-top:active {
+  transform: translateY(-1px);
 }
 
 .page-info {
@@ -205,21 +186,16 @@
       gap: 20px;
     }
 
-    .pagination-container {
-      gap: 5px;
-      margin-top: 30px;
+    .loading-more {
+      padding: 20px;
     }
 
-    .pagination-btn {
-      min-width: 80px;
-      padding: 8px 12px;
-      font-size: 12px;
-    }
-
-    .pagination-number {
-      width: 35px;
-      height: 35px;
-      font-size: 12px;
+    .scroll-to-top {
+      bottom: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
     }
 
     .car-listing-subtitle {

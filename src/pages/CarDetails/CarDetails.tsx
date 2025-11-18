@@ -31,6 +31,7 @@ import {
 } from '@mui/icons-material';
 import { getVehicleById } from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
+import OptimizedImage from '../../components/OptimizedImage/OptimizedImage';
 import './CarDetails.css';
 
 interface TabPanelProps {
@@ -62,6 +63,7 @@ const CarDetails: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [tabValue, setTabValue] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set([0])); // Track loaded images, preload first
 
   useEffect(() => {
     const fetchCarDetails = async () => {
@@ -94,17 +96,40 @@ const CarDetails: React.FC = () => {
 
   const handleNextImage = () => {
     if (car && car.photoUrls.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === car.photoUrls.length - 1 ? 0 : prev + 1
-      );
+      const nextIndex = currentImageIndex === car.photoUrls.length - 1 ? 0 : currentImageIndex + 1;
+      setCurrentImageIndex(nextIndex);
+      // Mark next image as loaded
+      setLoadedImages(prev => new Set(prev).add(nextIndex));
+      // Preload the image after next for smooth navigation
+      if (nextIndex + 1 < car.photoUrls.length) {
+        setLoadedImages(prev => new Set(prev).add(nextIndex + 1));
+      }
     }
   };
 
   const handlePrevImage = () => {
     if (car && car.photoUrls.length > 0) {
-      setCurrentImageIndex((prev) => 
-        prev === 0 ? car.photoUrls.length - 1 : prev - 1
-      );
+      const prevIndex = currentImageIndex === 0 ? car.photoUrls.length - 1 : currentImageIndex - 1;
+      setCurrentImageIndex(prevIndex);
+      // Mark previous image as loaded
+      setLoadedImages(prev => new Set(prev).add(prevIndex));
+      // Preload the image before previous for smooth navigation
+      if (prevIndex - 1 >= 0) {
+        setLoadedImages(prev => new Set(prev).add(prevIndex - 1));
+      }
+    }
+  };
+
+  const handleThumbnailClick = (index: number) => {
+    setCurrentImageIndex(index);
+    // Mark clicked image as loaded
+    setLoadedImages(prev => new Set(prev).add(index));
+    // Preload adjacent images
+    if (index + 1 < (car?.photoUrls.length || 0)) {
+      setLoadedImages(prev => new Set(prev).add(index + 1));
+    }
+    if (index - 1 >= 0) {
+      setLoadedImages(prev => new Set(prev).add(index - 1));
     }
   };
 
@@ -228,21 +253,41 @@ const CarDetails: React.FC = () => {
               }}
             >
               <Box position="relative">
-                <Box
-                  component="img"
-                  src={images[currentImageIndex]}
-                  alt={`${car.brand} ${car.model} - Image ${currentImageIndex + 1}`}
-                  sx={{
-                    width: '100%',
-                    height: { xs: 250, sm: 350, md: 450, lg: 500 },
-                    objectFit: 'cover',
-                    display: 'block'
-                  }}
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = defaultImage;
-                  }}
-                />
+                {/* Only render the current image */}
+                {loadedImages.has(currentImageIndex) ? (
+                  <OptimizedImage
+                    src={images[currentImageIndex]}
+                    alt={`${car.brand} ${car.model} - Image ${currentImageIndex + 1}`}
+                    width={800}
+                    height={500}
+                    priority={currentImageIndex === 0} // First image is priority
+                    objectFit="cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = defaultImage;
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: { xs: 250, sm: 350, md: 450, lg: 500 },
+                      backgroundColor: '#F5F5F5',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <CircularProgress 
+                      sx={{ 
+                        color: '#F78C1F',
+                        '& .MuiCircularProgress-circle': {
+                          strokeLinecap: 'round',
+                        }
+                      }} 
+                    />
+                  </Box>
+                )}
                 
                 {/* Navigation Arrows */}
                 {images.length > 1 && (
@@ -337,14 +382,10 @@ const CarDetails: React.FC = () => {
                 {images.map((image, index) => (
                   <Box
                     key={index}
-                    component="img"
-                    src={image}
-                    alt={`Thumbnail ${index + 1}`}
-                    onClick={() => setCurrentImageIndex(index)}
+                    onClick={() => handleThumbnailClick(index)}
                     sx={{
                       width: { xs: 60, sm: 80 },
                       height: { xs: 45, sm: 60 },
-                      objectFit: 'cover',
                       borderRadius: 2,
                       cursor: 'pointer',
                       border: 2,
@@ -352,6 +393,7 @@ const CarDetails: React.FC = () => {
                       opacity: currentImageIndex === index ? 1 : 0.7,
                       transition: 'all 0.3s ease',
                       flexShrink: 0,
+                      overflow: 'hidden',
                       '&:hover': {
                         opacity: 1,
                         transform: 'scale(1.05)',
@@ -359,7 +401,33 @@ const CarDetails: React.FC = () => {
                         boxShadow: '0 4px 12px rgba(247, 140, 31, 0.3)'
                       }
                     }}
-                  />
+                  >
+                    {/* Only load thumbnail if it's been viewed or is adjacent to current */}
+                    {(loadedImages.has(index) || Math.abs(index - currentImageIndex) <= 2) ? (
+                      <OptimizedImage
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        width={80}
+                        height={60}
+                        objectFit="cover"
+                      />
+                    ) : (
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          backgroundColor: '#F5F5F5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '10px',
+                          color: '#999'
+                        }}
+                      >
+                        {index + 1}
+                      </Box>
+                    )}
+                  </Box>
                 ))}
               </Box>
             )}

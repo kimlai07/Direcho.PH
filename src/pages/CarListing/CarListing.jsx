@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import CarCard from '../../components/CarCard/CarCard';
 import SearchBar from '../../components/SearchBar/SearchBar';
@@ -13,9 +13,26 @@ const CarListing = () => {
   const [isSearching, setIsSearching] = useState(false);
   const location = useLocation();
   
-  // Pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [carsPerPage] = useState(12); // Show 12 cars per page
+  // Infinite scroll state
+  const [displayedCars, setDisplayedCars] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const carsPerPage = 12;
+  const observer = useRef();
+  
+  // Last element ref for intersection observer
+  const lastCarElementRef = useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
 
   // 1. Fetch all cars only once when the component mounts
   useEffect(() => {
@@ -44,13 +61,23 @@ const CarListing = () => {
     }
   }, [location.state, allCars]);
 
+  // 3. Load more cars when page changes (infinite scroll)
+  useEffect(() => {
+    const startIndex = 0;
+    const endIndex = page * carsPerPage;
+    const newDisplayedCars = cars.slice(startIndex, endIndex);
+    
+    setDisplayedCars(newDisplayedCars);
+    setHasMore(endIndex < cars.length);
+  }, [page, cars]);
+
   // Helper to check if any search parameters are active
   const hasSearchParams = (params) => {
     if (!params) return false;
     return Object.values(params).some(value => value && value !== '');
   };
 
-  // 3. Perform search on the client-side using the 'allCars' state
+  // Perform search on the client-side using the 'allCars' state
   const handleSearch = (searchParams) => {
     setIsSearching(true);
     
@@ -70,70 +97,19 @@ const CarListing = () => {
     }
 
     setCars(filteredData);
-    setCurrentPage(1); // Reset to first page after search
+    setPage(1); // Reset to first page after search
     setIsSearching(false);
   };
 
-  // 4. Clear the search by resetting to the full list of cars
+  // Clear the search by resetting to the full list of cars
   const handleClearSearch = () => {
     setCars(allCars);
-    setCurrentPage(1); // Reset to first page
+    setPage(1); // Reset to first page
   };
 
-  // Pagination logic
-  const indexOfLastCar = currentPage * carsPerPage;
-  const indexOfFirstCar = indexOfLastCar - carsPerPage;
-  const currentCars = cars.slice(indexOfFirstCar, indexOfLastCar);
-  const totalPages = Math.ceil(cars.length / carsPerPage);
-
-  // Page change handlers
-  const handlePageChange = (pageNumber) => {
-    setCurrentPage(pageNumber);
+  // Scroll to top function
+  const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
-
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxPagesToShow = 5;
-    
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push('...');
-        pages.push(currentPage - 1);
-        pages.push(currentPage);
-        pages.push(currentPage + 1);
-        pages.push('...');
-        pages.push(totalPages);
-      }
-    }
-    
-    return pages;
   };
 
   if (loading) {
@@ -163,8 +139,8 @@ const CarListing = () => {
           <h1 className="car-listing-title">All Cars</h1>
           <p className="car-listing-subtitle">
             {isSearching ? 'Searching...' : `Found ${cars.length} car${cars.length !== 1 ? 's' : ''}`}
-            {!isSearching && cars.length > carsPerPage && (
-              <span className="page-info"> • Page {currentPage} of {totalPages}</span>
+            {!isSearching && displayedCars.length > 0 && displayedCars.length < cars.length && (
+              <span className="page-info"> • Showing {displayedCars.length} of {cars.length}</span>
             )}
           </p>
         </div>
@@ -176,10 +152,15 @@ const CarListing = () => {
         <div className="car-grid">
           {isSearching ? (
             <div className="loading-spinner">Searching cars...</div>
-          ) : currentCars.length > 0 ? (
-            currentCars.map(car => (
-              <CarCard key={car.id} car={car} />
-            ))
+          ) : displayedCars.length > 0 ? (
+            displayedCars.map((car, index) => {
+              // Attach ref to the last element
+              if (displayedCars.length === index + 1) {
+                return <div ref={lastCarElementRef} key={car.id}><CarCard car={car} /></div>;
+              } else {
+                return <CarCard key={car.id} car={car} />;
+              }
+            })
           ) : (
             <div className="no-results">
               <h3>No cars found</h3>
@@ -191,41 +172,18 @@ const CarListing = () => {
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {!isSearching && cars.length > carsPerPage && (
-          <div className="pagination-container">
-            <button 
-              onClick={handlePrevPage} 
-              disabled={currentPage === 1}
-              className="pagination-btn pagination-prev"
-            >
-              ← Previous
-            </button>
-            
-            <div className="pagination-numbers">
-              {getPageNumbers().map((page, index) => (
-                page === '...' ? (
-                  <span key={`ellipsis-${index}`} className="pagination-ellipsis">...</span>
-                ) : (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`pagination-number ${currentPage === page ? 'active' : ''}`}
-                  >
-                    {page}
-                  </button>
-                )
-              ))}
-            </div>
-            
-            <button 
-              onClick={handleNextPage} 
-              disabled={currentPage === totalPages}
-              className="pagination-btn pagination-next"
-            >
-              Next →
-            </button>
+        {/* Loading indicator when fetching more */}
+        {!isSearching && hasMore && displayedCars.length > 0 && displayedCars.length < cars.length && (
+          <div className="loading-more">
+            <div className="loading-spinner-small">Loading more cars...</div>
           </div>
+        )}
+
+        {/* Scroll to top button */}
+        {displayedCars.length > carsPerPage && (
+          <button className="scroll-to-top" onClick={scrollToTop} title="Scroll to top">
+            ↑
+          </button>
         )}
       </div>
     </div>
