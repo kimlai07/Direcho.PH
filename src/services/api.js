@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Vehicle, ApiResponse } from '../types/vehicle';
+import { cache, CACHE_TTL } from '../utils/cache';
 
 // Keep original endpoints for future use
 const privateUrlVehicle = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle';
@@ -7,6 +8,15 @@ const prodUrlVehicle = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/b
 const prodUrlVehicleAllCars = 'https://13zbodb0tk.execute-api.ap-east-1.amazonaws.com/bentacars/vehicle?filterSold=true';
 const newProdVehicleUrl= 'https://b6f0c09yu4.execute-api.ap-east-1.amazonaws.com/Prod/vehicles';
 const newProdVehicleUrls = 'https://l1y3094sxb.execute-api.us-east-1.amazonaws.com/dev/vehicle'
+
+// Cache keys
+const CACHE_KEYS = {
+    ALL_VEHICLES: 'all_vehicles',
+    NEW_VEHICLES: 'new_vehicles',
+    USER_PROFILE: 'user_profile',
+    USER_CARS: 'user_cars',
+    VEHICLE_BY_ID: 'vehicle_'
+};
 
 // Mock data
 const mockVehicles = [
@@ -100,16 +110,29 @@ const mockVehicles = [
 const USE_MOCK_DATA = false;
 
 export const fetchVehicles = async () => {
+    // Check cache first
+    const cachedData = cache.get(CACHE_KEYS.ALL_VEHICLES);
+    if (cachedData) {
+        return cachedData;
+    }
+
     if (USE_MOCK_DATA) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
+        cache.set(CACHE_KEYS.ALL_VEHICLES, mockVehicles, CACHE_TTL.MEDIUM);
         return mockVehicles;
     }
     
     try {
+        console.log('Fetching vehicles from database...');
         const response = await axios.get(newProdVehicleUrl);
-        console.log('Fetched vehicles:', response.data);
-        return response.data;
+        const data = response.data;
+        
+        // Cache the response for 5 minutes
+        cache.set(CACHE_KEYS.ALL_VEHICLES, data, CACHE_TTL.MEDIUM);
+        
+        console.log('Fetched and cached vehicles:', data);
+        return data;
     } catch (error) {
         console.error('Error fetching vehicles:', error);
         throw error;
@@ -117,15 +140,28 @@ export const fetchVehicles = async () => {
 };
 
 export const fetchAllCars = async () => {
+    // Check cache first
+    const cachedData = cache.get(CACHE_KEYS.ALL_VEHICLES);
+    if (cachedData) {
+        return cachedData;
+    }
+
     if (USE_MOCK_DATA) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
+        cache.set(CACHE_KEYS.ALL_VEHICLES, mockVehicles, CACHE_TTL.MEDIUM);
         return mockVehicles;
     }
     
     try {
+        console.log('Fetching all cars from database...');
         const response = await axios.get(newProdVehicleUrl);
-        return response.data;
+        const data = response.data;
+        
+        // Cache the response for 5 minutes
+        cache.set(CACHE_KEYS.ALL_VEHICLES, data, CACHE_TTL.MEDIUM);
+        
+        return data;
     } catch (error) {
         console.error('Error fetching all cars:', error);
         throw error;
@@ -133,15 +169,29 @@ export const fetchAllCars = async () => {
 };
 
 export const fetchNewVehicles = async () => {
+    // Check cache first
+    const cachedData = cache.get(CACHE_KEYS.NEW_VEHICLES);
+    if (cachedData) {
+        return cachedData;
+    }
+
     if (USE_MOCK_DATA) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500));
-        return mockVehicles.filter(car => car.year >= 2020);
+        const filteredData = mockVehicles.filter(car => car.year >= 2020);
+        cache.set(CACHE_KEYS.NEW_VEHICLES, filteredData, CACHE_TTL.MEDIUM);
+        return filteredData;
     }
     
     try {
+        console.log('Fetching new vehicles from database...');
         const response = await axios.get(newProdVehicleUrl);
-        return response.data;
+        const data = response.data;
+        
+        // Cache the response for 5 minutes
+        cache.set(CACHE_KEYS.NEW_VEHICLES, data, CACHE_TTL.MEDIUM);
+        
+        return data;
     } catch (error) {
         console.error('Error fetching new vehicles:', error);
         throw error;
@@ -149,12 +199,21 @@ export const fetchNewVehicles = async () => {
 };
 
 export const getVehicleById = async (id) => {
+    // Check cache first for specific vehicle
+    const cacheKey = CACHE_KEYS.VEHICLE_BY_ID + id;
+    const cachedVehicle = cache.get(cacheKey);
+    if (cachedVehicle) {
+        return { data: cachedVehicle };
+    }
+
     try {
-        // Fetch all cars and filter by ID
+        // Fetch all cars (will use cache if available)
         const allCars = await fetchAllCars();
         const vehicle = allCars.find(car => car.id.toString() === id.toString());
         
         if (vehicle) {
+            // Cache this specific vehicle for faster access (15 minutes)
+            cache.set(cacheKey, vehicle, CACHE_TTL.LONG);
             return { data: vehicle };
         } else {
             throw new Error('Vehicle not found');
@@ -166,10 +225,16 @@ export const getVehicleById = async (id) => {
 };
 
 export const fetchUserProfile = async () => {
+    // Check cache first
+    const cachedData = cache.get(CACHE_KEYS.USER_PROFILE);
+    if (cachedData) {
+        return cachedData;
+    }
+
     if (USE_MOCK_DATA) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 300));
-        return {
+        const profileData = {
             id: 1,
             name: 'Juan Dela Cruz',
             email: 'juan.delacruz@example.com',
@@ -179,21 +244,34 @@ export const fetchUserProfile = async () => {
             totalSales: 3,
             totalPurchases: 1
         };
+        // Cache user profile for 15 minutes
+        cache.set(CACHE_KEYS.USER_PROFILE, profileData, CACHE_TTL.LONG);
+        return profileData;
     }
     
     // Mock data for now - replace with actual API call
-    return {
+    const profileData = {
         name: 'Juan Dela Cruz',
         email: 'juan.delacruz@example.com',
         phone: '+63 917 123 4567'
     };
+    
+    // Cache user profile for 15 minutes
+    cache.set(CACHE_KEYS.USER_PROFILE, profileData, CACHE_TTL.LONG);
+    return profileData;
 };
 
 export const fetchUserCars = async () => {
+    // Check cache first
+    const cachedData = cache.get(CACHE_KEYS.USER_CARS);
+    if (cachedData) {
+        return cachedData;
+    }
+
     if (USE_MOCK_DATA) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 300));
-        return [
+        const userCarsData = [
             {
                 id: 101,
                 make: 'Toyota',
@@ -216,10 +294,41 @@ export const fetchUserCars = async () => {
                 imageUrl: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
             }
         ];
+        // Cache user cars for 5 minutes (changes more frequently)
+        cache.set(CACHE_KEYS.USER_CARS, userCarsData, CACHE_TTL.MEDIUM);
+        return userCarsData;
     }
     
     // Mock data for now - replace with actual API call
-    return [];
+    const userCarsData = [];
+    
+    // Cache user cars for 5 minutes
+    cache.set(CACHE_KEYS.USER_CARS, userCarsData, CACHE_TTL.MEDIUM);
+    return userCarsData;
+};
+
+/**
+ * Clear all cached data
+ * Use this when you need to force fresh data (e.g., after adding a new car)
+ */
+export const clearCache = () => {
+    cache.clear();
+};
+
+/**
+ * Clear specific cache key
+ * @param {string} key - Cache key to clear
+ */
+export const clearCacheKey = (key) => {
+    cache.delete(key);
+};
+
+/**
+ * Get cache statistics
+ * @returns {object} - Cache stats
+ */
+export const getCacheStats = () => {
+    return cache.getStats();
 };
 
 const api = {
@@ -228,7 +337,10 @@ const api = {
     fetchNewVehicles,
     getVehicleById,
     fetchUserProfile,
-    fetchUserCars
+    fetchUserCars,
+    clearCache,
+    clearCacheKey,
+    getCacheStats
 };
 
 export default api;

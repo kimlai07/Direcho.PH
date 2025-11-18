@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header';
 import Footer from './components/Footer/Footer';
+import CacheMonitor from './components/CacheMonitor/CacheMonitor';
 import Home from './pages/Home/Home';
 import CarListing from './pages/CarListing/CarListing';
 import CarDetails from './pages/CarDetails/CarDetails';
@@ -35,6 +36,8 @@ const App: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
+        {/* Cache Monitor - Remove in production or set to show only in development */}
+        {process.env.NODE_ENV === 'development' && <CacheMonitor />}
       </div>
     </Router>
   );
